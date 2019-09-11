@@ -1,8 +1,8 @@
 # Resource Explorer
 
-**under development**
+![img/resource-explorer.png](img/resource-explorer.png)
 
-This will be a resource explorer for interactive selection of a storage, compute,
+This is a resource explorer for interactive selection of a storage, compute, service,
 or other resource provided by Research Computing. The idea comes by way
 of the griznoggiest wisdom of @griznog.
 
@@ -22,10 +22,10 @@ Include multiple-choice, single-choice, boolean, and enumerate-choice.
  - **minimum-choice**: indicates a single choice field where the choices have integer values, and the user is selecting a minimum. For example, if the user selects a minimum storage or memory size, all choices above that will remain.
  - **maximum-choice**: is equivalent to minimum-choice, but opposite in direction. We select a maximum.
 
-Each question should be under the questions variable (a list), and have a title, description, required (true or false)
-and then options. For example:
+In the above, an enumerate choice implies there is an ordering to the logic. The user might want a minimum or maximum
+amount of memory, for example. Each question should be under the questions variable (a list), and have a title, description, required (true or false) and then options. For example:
 
-```yaml
+```json
       {
          "title": "Who is the resource for?",
          "id": "q-who",
@@ -51,7 +51,7 @@ and then options. For example:
 
 For a minimum-* or maximum-* choice, the ids must end in an integer value:
 
-```yaml
+```json
       {
          "title": "What size of storage are you looking for?",
          "id": "q-size",
@@ -75,26 +75,27 @@ For a minimum-* or maximum-* choice, the ids must end in an integer value:
       },
 ```
 
-We do this so we can parse the ids and then rank order them. For a boolean choice, they must end in true or false:
+We do this so we can parse the ids and then rank order them. For a boolean choice, you can just use a single-choice
+with two choices:
 
-```yaml
+```json
       {
-         "title": "Do you want snapshots?",
-         "id": "q-snapshots",
-         "description": "A read-only image to reflect the state of your files.",
+         "title": "Do you require backup?",
+         "id": "q-backups",
+         "description": "Some or all of your files will be copied on a regular basis in case you need restore.",
          "required": false,
-         "type": "boolean",
+         "type": "single-choice",
          "options": [
             {
-               "name": "snapshots",
-               "id": "snapshots-true"
+               "name": "backups",
+               "id": "backups-true"
             },
             {
-               "name": "no snapshots",
-               "id": "snapshots-false"
+               "name": "no backups",
+               "id": "backups-false"
             }
          ]
-      }
+      },
 ```
 
 Notice that each choice has a unique id associated with it. These will be used as tags associated with each
@@ -102,60 +103,40 @@ resource to help with the filtering.
 
 ### Resources
 
-For a resource, each of the questions above can be represented under "attributes."
- 
- - if "attributes" -> `q-<tag>` is defined but empty, a selection of any field for `q-<tag>` invalidates the choice.
- - if "attributes" -> `q-<tag>` is not defined, making a choice for any field for `q-<tag>` doesn't impact the choice.
- - if "attributes" -> `q-<tag>` includes a subset of choices, then the resource is kept only if the user chooses a selection in the list.
+A typical resource looks like this:
 
-## Front End
-
-I've decided to challenge myself a bit and develop a front end application
-with [Quasar](https://quasar.dev), which uses (real) vue.js on the back.
-This might take a little longer, but the learning and fun will be worth it!
-
-### Developing an App with Quasar
-
-You can start by bringing up the container with docker-compose, it will
-build for you:
-
-```bash
-$ docker-compose up -d
+```json
+      {
+         "title": "Nero",
+         "id": "nero",
+         "url": "https://nero-docs.stanford.edu",
+         "attributes": {
+           "q-kind": ["kind-compute", "kind-cloud"],
+           "q-service": [],
+           "q-who": ["who-faculty"], // only faculty allowed
+                                     // domain is left out, implying all domains
+                                     // size is left out, implying all sizes
+           "q-framework": ["framework-kubernetes", "framework-containers"],
+           "q-backups": ["backups-true"]
+         }
+      },
 ```
 
-Then shell inside!
+Note that we require a title (a user friendly print-able value), an id (for the object in the DOM), a url to
+link to, and then a list of attributes. For each attribute, the key corresponds to an id for a question,
+and then the list of values is a list of responses that, if chosen by the user, would make 
+it a valid choice. Specifically:
+  
+ - if a question key is defined but empty, a selection of any field for the key invalidates the resource.
+ - if a question key is not defined, making a choice for any field for doesn't impact the resource (it stays or remains hidden).
+ - if a question key includes a subset of choices, then the resource is kept only if the user chooses a selection in the list.
 
-```bash
-$ docker exec -it test_frontend sh
-```
+For the above, this would mean that:
 
-Create your first app:
+ - if the user selected any kind of `q-service`, the Nero option would be hidden.
+ - if the user selected kind-compute and/or kind-cloud, Nero would remain.
+ - if the user selected any other kind of audience other than faculty (who-faculty) Nero would be hidden.
+ - Selecting framework as kubernetnes or containers will keep Nero. Selecting slurm (not in the list) will hide it.
+ - Selecting backups-false will hide Nero.
 
-```bash
-$ quasar create app
-```
-
-To develop, cd into the folder and run a development server
-
-```bash
-$ cd app
-$ quasar dev
-```
-
-Install this extension to help add components:
-
-```bash
-$ quasar ext add qautomate
-```
-
-When you are ready to make the distrubtion:
-
-```bash
-$ quasar build
-```
-
-And then to serve:
-
-```bash
-$ quasar serve dist/spa -p 8080
-```
+This repository serves only as an example, and doesn't reflect the actual state of Stanford resources (but we will make one!)

@@ -1,0 +1,34 @@
+.btn {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 15px 25px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 0;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+
+
+.btn-primary {
+  background-color: #500e3d;
+  border-color: #500e3d; }
+  .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    color: #000;
+    background-color: #951169 !important;
+    border-color: #951169 !important; }
+
+.btn-lg {
+  font-size: 16px;
+  padding: 25px 35px; }
+
+.navbar-nav a {
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px !important;
+}
+
+.main-explain-area {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding: 15px inherit;
+}

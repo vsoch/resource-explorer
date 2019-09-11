@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Stanford Research Computing Resource Explorer</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <meta name="description" content="What kind of resource are you looking for?">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/chart.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <link rel="icon" type="image/png" href="favicon.ico">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-custom" id="mainNav">
+  <div class="container-fluid" id="logo-navbar">
+   <a class="navbar-brand navbar-brand-logo" href="https://us-rse.org">
+       <img id="logo" alt="logo" src="img/SRCC-square-red.png" style="height:80%"></a>
+      <a class="navbar-brand" href="">SRCC Resource Explorer
+      </a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li><a href="about/">About</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid" style="padding:50px; padding-top:100px">
+    <div class="row" id="app">
+        <div class="col-md-8">
+            <form class="form" @submit.prevent>
+              <h3>Resource Recommendation Tool</h3>
+                <p style="margin-bottom:20px"><small>What SRCC resource do you need?</small></p>
+                  <div v-for="question in questions">
+                    <div class="form-group">
+                        <label>{{ question.title }}</label>
+                        <select class="form-control">
+		           <option disabled value="">Choose your answer</option>
+		           <option v-for="option in question.options" v-bind:value="option.id">{{option.name}}</option>
+                        </select>
+		        <p>{{ question.description }}</p>
+	            </div>
+                  </div>
+            </form>
+        </div>
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-3">
+            <h3>Your Options</h3>
+                <p style="margin-bottom:20px"><small>Answer questions on the left to narrow down the list</small></p>
+		<div class="list-group" v-for="resource in resources">
+		  <button type="button" class="list-group-item list-group-item-action">{{ resource.title }}</button>
+		</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/g/filesaver.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+<script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+<!--https://github.com/chrispahm/chartjs-plugin-dragData-->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@0.3.0/dist/chartjs-plugin-dragData.min.js"></script>
+<script src="resource-explorer.js"></script>
+
+</body>
+</html>

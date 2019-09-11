@@ -7,6 +7,7 @@ const resources = [
          "url": "https://nero-docs.stanford.edu",
          "attributes": {
            "q-kind": ["kind-compute", "kind-cloud"],
+           "q-service": [],
            "q-who": ["who-faculty"], // only faculty allowed
                                      // domain is left out, implying all domains
                                      // size is left out, implying all sizes
@@ -15,11 +16,25 @@ const resources = [
          }
       },
       {
+         "title": "Research Software Engineering",
+         "id": "rse-services",
+         "url": "https://stanford-rc.github.io/rse-services",
+         "attributes": {
+           "q-kind": ["kind-service"],
+           "q-size": [],
+           "q-service": ["service-software"],
+           "q-framework": ["framework-containers"],
+           "q-backups": [],
+           "q-snapshots": []
+         }
+      },
+      {
          "title": "Sherlock",
          "id": "sherlock",
          "url": "https://www.sherlock.stanford.edu/docs/overview/introduction/",
          "attributes": {
            "q-kind": ["kind-compute", "kind-hpc"],
+           "q-service": [],
            "q-framework": ["framework-slurm", "framework-containers"],
            "q-backups": ["backups-true"]
          }
@@ -30,6 +45,7 @@ const resources = [
          "url": "https://login.scg.stanford.edu/",
          "attributes": {
            "q-kind": ["kind-compute", "kind-hpc"],
+           "q-service": [],
            "q-framework": ["framework-slurm", "framework-containers"],
            "q-domain": ["domain-bioinformatics"],
            "q-backups": ["backups-true"]
@@ -41,6 +57,7 @@ const resources = [
          "url": "https://stanford-rc.github.io/docs-oak/",
          "attributes": {
            "q-kind": ["kind-storage"],
+           "q-service": [],
            "q-framework": [], // no containers, kubernetes, or slurm
            "q-backups": ["backups-true"]
          }
@@ -60,6 +77,10 @@ const questions = [
                "id": "kind-storage"
             },
             {
+               "name": "service",
+               "id": "kind-service"
+            },
+            {
                "name": "compute",
                "id": "kind-compute"
             },
@@ -70,6 +91,19 @@ const questions = [
             {
                "name": "hpc",
                "id": "kind-hpc"
+            }
+         ]
+      },
+      {
+         "title": "Are you looking for a service?",
+         "id": "q-service",
+         "description": "Select one or more services.",
+         "required": false,
+         "type": "multiple-choice",
+         "options": [
+            {
+               "name": "software engineering",
+               "id": "service-software"
             }
          ]
       },

@@ -46,8 +46,8 @@
                   <div v-for="question in questions">
                     <div class="form-group">
                         <label>{{ question.title }}</label>
-                        <select class="form-control">
-		           <option disabled value="">Choose your answer</option>
+                        <select v-bind:multiple="question.type == 'multiple-choice'" class="form-control" @change="filterOptions" v-bind:id="question.id" v-bind:required="question.required">
+		           <option value="">---</option>
 		           <option v-for="option in question.options" v-bind:value="option.id">{{option.name}}</option>
                         </select>
 		        <p>{{ question.description }}</p>
@@ -61,8 +61,15 @@
             <h3>Your Options</h3>
                 <p style="margin-bottom:20px"><small>Answer questions on the left to narrow down the list</small></p>
 		<div class="list-group" v-for="resource in resources">
-		  <button type="button" class="list-group-item list-group-item-action">{{ resource.title }}</button>
-		</div>
+		  <a v-bind:href="resource.url"
+                     target="_blank"
+                     :id="resource.id"
+                     style="text-decoration:none">
+                    <button type="button" 
+                            style="cursor:pointer"
+                            class="list-group-item list-group-item-action">{{ resource.title }}</button>
+                  </a>
+ 		</div>
         </div>
     </div>
 </div>

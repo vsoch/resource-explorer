@@ -2,20 +2,77 @@
 
 const resources = [
       {
-         "title": "Nero"
+         "title": "Nero",
+         "id": "nero",
+         "url": "https://nero-docs.stanford.edu",
+         "attributes": {
+           "q-kind": ["kind-compute", "kind-cloud"],
+           "q-who": ["who-faculty"], // only faculty allowed
+                                     // domain is left out, implying all domains
+                                     // size is left out, implying all sizes
+           "q-framework": ["framework-kubernetes", "framework-containers"],
+           "q-backups": ["backups-true"]
+         }
       },
       {
-         "title": "Sherlock"
+         "title": "Sherlock",
+         "id": "sherlock",
+         "url": "https://www.sherlock.stanford.edu/docs/overview/introduction/",
+         "attributes": {
+           "q-kind": ["kind-compute", "kind-hpc"],
+           "q-framework": ["framework-slurm", "framework-containers"],
+           "q-backups": ["backups-true"]
+         }
       },
       {
-         "title": "SCG-4"
+         "title": "SCG-4",
+         "id": "scg-4",
+         "url": "https://login.scg.stanford.edu/",
+         "attributes": {
+           "q-kind": ["kind-compute", "kind-hpc"],
+           "q-framework": ["framework-slurm", "framework-containers"],
+           "q-domain": ["domain-bioinformatics"],
+           "q-backups": ["backups-true"]
+         }
       },
       {
-         "title": "Oak"
+         "title": "Oak",
+         "id": "oak",
+         "url": "https://stanford-rc.github.io/docs-oak/",
+         "attributes": {
+           "q-kind": ["kind-storage"],
+           "q-framework": [], // no containers, kubernetes, or slurm
+           "q-backups": ["backups-true"]
+         }
       }
    ]
 
 const questions = [
+      {
+         "title": "Do you know the kind of resource you are looking for?",
+         "id": "q-kind",
+         "description": "Select one or more kinds of resources.",
+         "required": false,
+         "type": "multiple-choice",
+         "options": [
+            {
+               "name": "storage",
+               "id": "kind-storage"
+            },
+            {
+               "name": "compute",
+               "id": "kind-compute"
+            },
+            {
+               "name": "cloud",
+               "id": "kind-cloud"
+            },
+            {
+               "name": "hpc",
+               "id": "kind-hpc"
+            }
+         ]
+      },
       {
          "title": "Who is the resource for?",
          "id": "q-who",
@@ -110,10 +167,10 @@ const questions = [
       },
       {
          "title": "Do you require backup?",
-         "id": "q-backup",
+         "id": "q-backups",
          "description": "Some or all of your files will be copied on a regular basis in case you need restore.",
          "required": false,
-         "type": "boolean",
+         "type": "single-choice",
          "options": [
             {
                "name": "backups",
@@ -127,18 +184,18 @@ const questions = [
       },
       {
          "title": "Do you want snapshots?",
-         "id": "q-snapshot",
+         "id": "q-snapshots",
          "description": "A read-only image to reflect the state of your files.",
          "required": false,
-         "type": "boolean",
+         "type": "single-choice",
          "options": [
             {
                "name": "snapshots",
-               "id": "snapshot-true"
+               "id": "snapshots-true"
             },
             {
                "name": "no snapshots",
-               "id": "snapshot-false"
+               "id": "snapshots-false"
             }
          ]
       }
@@ -148,7 +205,25 @@ new Vue ({
   el: '#app',
   data: {
     resources,
-    questions
+    questions,
+    lookup: null,             // question lookup
+    resource_lookup: null,    // resource lookup
+  },
+
+  // Create a lookup dictionary of questions and resources
+  mounted() {
+    lookup = Object()
+    resource_lookup = Object()
+
+    $.each(this.questions, function(i, question){
+       lookup[question.id] = question;
+    });
+    $.each(this.resources, function(i, resource){
+       resource_lookup[resource.id] = resource;
+    });
+
+    this.lookup = lookup;
+    this.resource_lookup = resource_lookup;
   },
 
   methods: {
@@ -161,6 +236,87 @@ new Vue ({
           color += letters[Math.floor(Math.random() * 16)];
       }
       return color;
+    },
+
+    filterOptions: function(event) {
+        var question_id = event.target.id;
+        var attribute = event.target.value;
+        var question = self.lookup[question_id];
+        console.log(question);
+        console.log(attribute);
+
+        // If it's choice, remove resources that don't qualify
+        if (question.type == "multiple-choice" || question.type == 'single-choice'){
+
+            $.each(this.resources, function(i, resource){
+
+                // Attribute must be in object to be relevant
+                if (question.id in resource.attributes) {
+
+                    // If attribute is in list, show it
+                    if ($.inArray(attribute, resource.attributes[question.id]) != -1) {
+                        $("#" + resource.id).show();
+
+                    // Otherwise hide it
+                    } else {
+                        $("#" + resource.id).hide();
+                    }
+                }
+                
+            });
+            
+        } else if (question.type == "minimum-choice") {
+
+            // The last is a number
+            var ranking = attribute.split('-');
+            ranking = attribute[attribute.length -1];
+
+            $.each(this.resources, function(i, resource){
+
+                // Attribute must be in object to be relevant
+                if (question.id in resource.attributes) {
+
+                    var resource_ranking = resource.attributes[question.id].split('-');
+                    resource_ranking = resource_ranking[resource_ranking.length -1];
+
+                    // If attribute is in list, show it
+                    if (resource_ranking >= ranking) {
+                        $("#" + resource.id).show();
+
+                    // Otherwise hide it
+                    } else {
+                        $("#" + resource.id).hide();
+                    }
+                }                
+            });
+
+        } else if (question.type == "maximum-choice") {
+
+            var ranking = attribute.split('-');
+            ranking = attribute[attribute.length -1];
+
+            $.each(this.resources, function(i, resource){
+
+                // Attribute must be in object to be relevant
+                if (question.id in resource.attributes) {
+
+                    var resource_ranking = resource.attributes[question.id].split('-');
+                    resource_ranking = resource_ranking[resource_ranking.length -1];
+
+                    // If attribute is in list, show it
+                    if (resource_ranking <= ranking) {
+                        $("#" + resource.id).show();
+
+                    // Otherwise hide it
+                    } else {
+                        $("#" + resource.id).hide();
+                    }
+                }
+            });
+
+        } else {
+            console.log('Unrecognized question type ' + question.type);
+        }
     },
 
     saveImage: function() {
@@ -176,4 +332,11 @@ new Vue ({
       }
     }
   }
+})
+
+$('.list-group-item').mouseover(function() {
+   $(this).addClass('active');
+})
+$('.list-group-item').mouseout(function() {
+   $(this).removeClass('active');
 })

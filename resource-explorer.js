@@ -279,6 +279,11 @@ new Vue ({
         console.log(question);
         console.log(attribute);
 
+        // Don't filter empty attributes
+        if (attribute == ""){
+          return;
+        }
+
         // If it's choice, remove resources that don't qualify
         if (question.type == "multiple-choice" || question.type == 'single-choice'){
 

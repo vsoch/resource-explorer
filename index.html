@@ -45,8 +45,7 @@
                   <div v-for="question in questions">
                     <div class="form-group">
                         <label>{{ question.title }}</label>
-                        <select v-bind:multiple="question.type == 'multiple-choice'" class="form-control" @change="filterOptions" v-bind:id="question.id" v-bind:required="question.required">
-		           <option value="">---</option>
+                        <select v-bind:multiple="question.type == 'multiple-choice'" class="form-control question" @change="filterOptions" v-bind:id="question.id" v-bind:required="question.required">
 		           <option v-for="option in question.options" v-bind:value="option.id">{{option.name}}</option>
                         </select>
 		        <p>{{ question.description }}</p>
@@ -66,9 +65,10 @@
                      style="text-decoration:none">
                     <button type="button" 
                             style="cursor:pointer"
-                            class="list-group-item list-group-item-action">{{ resource.title }}</button>
+                            class="list-group-item list-group-item-action resource">{{ resource.title }}</button>
                   </a>
  		</div>
+                <button @click="resetOptions" class="btn btn-danger" style="margin-top:30px">Reset</button>
         </div>
     </div>
 </div>

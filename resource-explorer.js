@@ -242,6 +242,7 @@ new Vue ({
     questions,
     lookup: null,             // question lookup
     resource_lookup: null,    // resource lookup
+    choices: Object()
   },
 
   // Create a lookup dictionary of questions and resources
@@ -272,103 +273,87 @@ new Vue ({
       return color;
     },
 
-    filterOptions: function(event) {
-        var question_id = event.target.id;
-        var attribute = event.target.value;
-        var question = self.lookup[question_id];
-        console.log(question);
-        console.log(attribute);
-
-        // Don't filter empty attributes
-        if (attribute == ""){
-          return;
-        }
-
-        // If it's choice, remove resources that don't qualify
-        if (question.type == "multiple-choice" || question.type == 'single-choice'){
-
-            $.each(this.resources, function(i, resource){
-
-                // Attribute must be in object to be relevant
-                if (question.id in resource.attributes) {
-
-                    // If attribute is in list, show it
-                    if ($.inArray(attribute, resource.attributes[question.id]) != -1) {
-                        $("#" + resource.id).show();
-
-                    // Otherwise hide it
-                    } else {
-                        $("#" + resource.id).hide();
-                    }
-                }
-                
-            });
-            
-        } else if (question.type == "minimum-choice") {
-
-            // The last is a number
-            var ranking = attribute.split('-');
-            ranking = attribute[attribute.length -1];
-
-            $.each(this.resources, function(i, resource){
-
-                // Attribute must be in object to be relevant
-                if (question.id in resource.attributes) {
-
-                    var resource_ranking = resource.attributes[question.id].split('-');
-                    resource_ranking = resource_ranking[resource_ranking.length -1];
-
-                    // If attribute is in list, show it
-                    if (resource_ranking >= ranking) {
-                        $("#" + resource.id).show();
-
-                    // Otherwise hide it
-                    } else {
-                        $("#" + resource.id).hide();
-                    }
-                }                
-            });
-
-        } else if (question.type == "maximum-choice") {
-
-            var ranking = attribute.split('-');
-            ranking = attribute[attribute.length -1];
-
-            $.each(this.resources, function(i, resource){
-
-                // Attribute must be in object to be relevant
-                if (question.id in resource.attributes) {
-
-                    var resource_ranking = resource.attributes[question.id].split('-');
-                    resource_ranking = resource_ranking[resource_ranking.length -1];
-
-                    // If attribute is in list, show it
-                    if (resource_ranking <= ranking) {
-                        $("#" + resource.id).show();
-
-                    // Otherwise hide it
-                    } else {
-                        $("#" + resource.id).hide();
-                    }
-                }
-            });
-
-        } else {
-            console.log('Unrecognized question type ' + question.type);
-        }
+    // Clear all selections to start over 
+    resetOptions: function(event) {
+        $.each($(".question option:selected"), function () {
+            $(this).prop('selected', false);
+        });
+        this.choices = Object();
+        this.calculateChoices(this.choices, this.lookup);
     },
 
-    saveImage: function() {
+    filterOptions: function(event) {
+        var question_id = event.target.id;
+      
+        // For multiple select, we need all of them
+        var attribute = $('#' + question_id).val();
+ 
+        // Update choices
+        this.choices[question_id] = attribute;
+        this.calculateChoices(this.choices, this.lookup);
 
-      if (this.alias != null) {
-         var alias = this.alias;
-         this.showShare = true;
-         var canvas = document.getElementById("rse-generator");
+    },
 
-         canvas.toBlob(function(blob) {
-            saveAs(blob, alias + "-rse-phenotype.png");
-         });
-      }
+    // Based on content in this.choices, adjust resources shown
+    calculateChoices: function(choices, lookup) {
+
+        // loop through resources, and assess choices for each 
+        $.each(this.resources, function(i, resource){
+
+            // default is true (selected, or leave showing)
+            var selected = true;
+
+            $.each(choices, function(question_id, values) {
+                var question = lookup[question_id];
+
+                // Only assess if the key is defined as an attribute
+                if (question.id in resource.attributes) {
+
+                    if (question.type == "multiple-choice" || question.type == 'single-choice'){
+ 
+                        // If any attribute is not in list, don't show it
+                        $.each(values, function(ii, value) {
+                            if ($.inArray(value, resource.attributes[question.id]) == -1) {
+                                console.log(value + ' is not in ' + resource.attributes[question.id]);
+                                selected = false;
+                             }
+                        });
+
+                    } else if (question.type == "minimum-choice" || question.type == "maximum-choice"){
+  
+                        // We should only have one value
+                        var ranking = values[0].split('-');
+                        ranking = ranking[ranking.length -1];
+
+                        // Compare to the resource ranking
+                        var resource_ranking = resource.attributes[question.id].split('-');
+                        resource_ranking = resource_ranking[resource_ranking.length -1];
+
+                        // If the resource is less than the chosen, hide it
+                        if (question.type == "minimum-choice") {
+                            if (resource_ranking <= ranking) {
+                                selected = false;
+                            }
+
+                        // If the resource is greater than the chosen, hide it
+                        } else {
+                            if (resource_ranking >= ranking) {
+                                selected = false;
+                            }
+                        }
+                    } else {
+                         console.log('Unrecognized question type ' + question.type);
+                    }
+                }
+            });
+
+            console.log("Resource " + resource.title + " selected is " + selected);
+            if (selected == true) {
+                $("#" + resource.id).show();
+            } else {
+                $("#" + resource.id).hide();
+            }
+        });            
     }
   }
 })

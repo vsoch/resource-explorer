@@ -50,6 +50,13 @@ blockquote {
   background-color: whitesmoke;
 }
 
+div.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  padding: 0px;
+}
+
 .caption {
   font-size: 14px;
   font-style: italic;

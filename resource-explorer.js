@@ -322,22 +322,22 @@ new Vue ({
                     } else if (question.type == "minimum-choice" || question.type == "maximum-choice"){
   
                         // We should only have one value
-                        var ranking = values[0].split('-');
-                        ranking = ranking[ranking.length -1];
+                        var ranking = values.split('-');
+                        ranking = parseInt(ranking[ranking.length -1]);
 
                         // Compare to the resource ranking
-                        var resource_ranking = resource.attributes[question.id].split('-');
-                        resource_ranking = resource_ranking[resource_ranking.length -1];
+                        var resource_ranking = resource.attributes[question.id][0].split('-');
+                        resource_ranking = parseInt(resource_ranking[resource_ranking.length -1]);
 
                         // If the resource is less than the chosen, hide it
                         if (question.type == "minimum-choice") {
-                            if (resource_ranking <= ranking) {
+                            if (resource_ranking < ranking) {
                                 selected = false;
                             }
 
                         // If the resource is greater than the chosen, hide it
                         } else {
-                            if (resource_ranking >= ranking) {
+                            if (resource_ranking > ranking) {
                                 selected = false;
                             }
                         }
